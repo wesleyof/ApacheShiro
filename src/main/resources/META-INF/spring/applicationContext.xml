@@ -80,4 +80,11 @@
         class="br.com.ufmt.apacheshiro.security.ExemploRealm">
         <property name="credentialsMatcher" ref="credentialsMatcher" />
     </bean>
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!-- Single realm app (realm configured next, below). If you have multiple 
+            realms, use the 'realms' property instead. -->
+        <!-- Se tivéssemos múltiplos realms, definiríamos o atributo realms ao invés de realm -->    
+        <property name="realm" ref="exemploRealm" />
+    </bean>    
 </beans>
