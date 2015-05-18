@@ -129,5 +129,28 @@
                 /** = authc
             </value>
         </property>
-    </bean>    
+    </bean> 
+
+    <!-- Post processor that automatically invokes init() and destroy() methods -->
+    <!-- Processador responsável por chamar métodos de init() e destroy() em objetos
+         do Apache Shiro que implementarem Initializable e Destroyable -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+    <!-- Spring AOP auto-proxy creation (required to support Shiro annotations) -->
+    <!-- Spring AOP. Necessário para o funcionamento das Annotations -->
+    <bean
+        class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+        depends-on="lifecycleBeanPostProcessor" />
+
+    <!-- Objeto responsável por verificar quais métodos possuem annotations do
+         Apache Shiro, para que seja tomada uma providência de autorização -->
+    <bean
+        class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager" />
+    </bean>
+    
+    <!-- Apenas um objeto que usaremos para gerar o salt do usuário no momento
+         de seu cadastro -->
+    <bean id="randomNumberGenerator" class="org.apache.shiro.crypto.SecureRandomNumberGenerator">
+    </bean>       
 </beans>
