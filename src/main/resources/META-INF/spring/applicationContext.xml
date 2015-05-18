@@ -67,4 +67,90 @@
         <property name="persistenceUnitName" value="persistenceUnit"/>
         <property name="dataSource" ref="dataSource"/>
     </bean>
+
+    <!-- Apache Shiro -->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <property name="hashAlgorithmName" value="SHA-512" />
+        <!-- Define que não terá encoding hexadecimal, portanto, será Base64 -->
+        <property name="storedCredentialsHexEncoded" value="false" />
+        <property name="hashIterations" value="${criptografia.numeroDeIteracoesDeHash}" />
+    </bean>
+
+    <bean id="exemploRealm"
+        class="br.com.ufmt.apacheshiro.security.ExemploRealm">
+        <property name="credentialsMatcher" ref="credentialsMatcher" />
+    </bean>
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!-- Single realm app (realm configured next, below). If you have multiple 
+            realms, use the 'realms' property instead. -->
+        <!-- Se tivéssemos múltiplos realms, definiríamos o atributo realms ao invés de realm -->    
+        <property name="realm" ref="exemploRealm" />
+    </bean>
+
+    <!-- Define the Shiro Filter here (as a FactoryBean) instead of directly 
+        in web.xml - web.xml uses the DelegatingFilterProxy to access this bean. 
+        This allows us to wire things with more control as well utilize nice Spring 
+        things such as PropertiesPlaceholderConfigurer and abstract beans or anything 
+        else we might need: -->
+
+    <!-- O ShiroFilterFactoryBean, é uma fábrica de filtros. Ele definirá, automaticamente, os filtros que já conhecemos: authc, perms, etc. É importante que seu id seja igual ao definido no web.xml -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- Ajusta a referência para o SecurityManager -->
+        <property name="securityManager" ref="securityManager" />
+        <!-- Define qual é a URL da página de login -->
+        <property name="loginUrl" value="/perfil?formlogin" />
+        <!-- Define a URL para a qual o usuário será redirecionado quando autenticado
+             com sucesso -->
+        <property name="successUrl" value="/" />
+        <!-- Define a página a ser mostrada quando o usuário não possuir autorização
+             para acessar determinado recurso -->
+        <property name="unauthorizedUrl" value="/perfil/nao_autorizado" />
+        <!-- The 'filters' property is usually not necessary unless performing 
+            an override, which we want to do here (make authc point to a PassthruAuthenticationFilter 
+            instead of the default FormAuthenticationFilter: -->
+        <!-- Essa propriedade só deve ser usada para definir filtros novos
+            (além dos fornecidos pelo Apache Shiro) ou para sobrescrever um dos filtros fornecidos, como é o caso mostrado abaixo, em que sobrescrevemos o filtro authc -->
+        <property name="filters">
+            <util:map>
+                <entry key="authc">
+                    <bean
+                        class="org.apache.shiro.web.filter.authc.PassThruAuthenticationFilter" />
+                </entry>
+            </util:map>
+        </property>
+        <!-- Aqui definimos aquilo que teríamos definido na seção [urls] da
+             configuração INI -->
+        <property name="filterChainDefinitions">
+            <value>
+                /perfil/** = anon
+                /resources/** = anon
+                / = anon
+                /** = authc
+            </value>
+        </property>
+    </bean> 
+
+    <!-- Post processor that automatically invokes init() and destroy() methods -->
+    <!-- Processador responsável por chamar métodos de init() e destroy() em objetos
+         do Apache Shiro que implementarem Initializable e Destroyable -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+    <!-- Spring AOP auto-proxy creation (required to support Shiro annotations) -->
+    <!-- Spring AOP. Necessário para o funcionamento das Annotations -->
+    <bean
+        class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+        depends-on="lifecycleBeanPostProcessor" />
+
+    <!-- Objeto responsável por verificar quais métodos possuem annotations do
+         Apache Shiro, para que seja tomada uma providência de autorização -->
+    <bean
+        class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager" />
+    </bean>
+    
+    <!-- Apenas um objeto que usaremos para gerar o salt do usuário no momento
+         de seu cadastro -->
+    <bean id="randomNumberGenerator" class="org.apache.shiro.crypto.SecureRandomNumberGenerator">
+    </bean>       
 </beans>
