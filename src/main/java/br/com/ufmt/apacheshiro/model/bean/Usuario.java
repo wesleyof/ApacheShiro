@@ -21,8 +21,11 @@ public class Usuario {
 	@NotNull
 	@Column(unique=true)
     private String login;
+
 	@NotNull
     private String senha;
+
+    private String salt;
 
     @ManyToMany
     private Set<Papel> papeis = new HashSet<Papel>();
@@ -64,6 +67,10 @@ public class Usuario {
 	public String toString() {
 		return nome + " (" + login + ")";
 	}
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }    
 
     public String getNome() {
         return this.nome;
@@ -126,6 +133,10 @@ public class Usuario {
         if (this.entityManager == null) this.entityManager = entityManager();
         this.entityManager.persist(this);
     }
+
+    public String getSalt() {
+        return this.salt;
+    }    
 
     @Transactional
     public void remove() {
