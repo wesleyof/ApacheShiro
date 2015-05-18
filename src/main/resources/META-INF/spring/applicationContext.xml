@@ -67,4 +67,17 @@
         <property name="persistenceUnitName" value="persistenceUnit"/>
         <property name="dataSource" ref="dataSource"/>
     </bean>
+
+    <!-- Apache Shiro -->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <property name="hashAlgorithmName" value="SHA-512" />
+        <!-- Define que não terá encoding hexadecimal, portanto, será Base64 -->
+        <property name="storedCredentialsHexEncoded" value="false" />
+        <property name="hashIterations" value="${criptografia.numeroDeIteracoesDeHash}" />
+    </bean>
+
+    <bean id="exemploRealm"
+        class="br.com.ufmt.apacheshiro.security.ExemploRealm">
+        <property name="credentialsMatcher" ref="credentialsMatcher" />
+    </bean>
 </beans>
