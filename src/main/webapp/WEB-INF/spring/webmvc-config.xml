@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd                 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd                 http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+
+    <!-- Necessário para que possamos utilizar Annotations diretamente nos métodos
+         dos Controllers do Spring MVC -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>              
                 
     <!-- The controllers are autodetected POJOs labeled with the @Controller annotation. -->
     <context:component-scan base-package="br.com.ufmt.apacheshiro" use-default-filters="false">
@@ -47,6 +51,8 @@
     <!-- This bean resolves specific types of exceptions to corresponding logical - view names for error views. 
     The default behaviour of DispatcherServlet - is to propagate all exceptions to the servlet 
     container: this will happen - here with all other types of exceptions. -->
+    <!-- Mapeamento das URLs para as quais os usuário serão redirecionados quando
+         acontecer uma exceção. Essa configuração já foi definida, apenas adicionamos as duas últimas definições referentes às exceções de autorização do Apache Shiro. -->
     <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver" p:defaultErrorView="uncaughtException">
         <property name="exceptionMappings">
             <props>
@@ -54,6 +60,8 @@
                 <prop key=".NoSuchRequestHandlingMethodException">resourceNotFound</prop>
                 <prop key=".TypeMismatchException">resourceNotFound</prop>
                 <prop key=".MissingServletRequestParameterException">resourceNotFound</prop>
+                <prop key="org.apache.shiro.authz.UnauthorizedException">redirect:/perfil/nao_autorizado</prop>
+                <prop key="org.apache.shiro.authz.AuthorizationException">redirect:/perfil?formlogin</prop>
             </props>
         </property>
     </bean>
