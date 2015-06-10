@@ -1,17 +1,11 @@
 package br.com.ufmt.apacheshiro.controller;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.hibernate.cfg.NotYetImplementedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,27 +16,20 @@ import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 import br.com.ufmt.apacheshiro.model.bean.Usuario;
-import br.com.ufmt.apacheshiro.service.UsuarioService;
 
 @RequestMapping("/perfil")
 @Controller
 public class PerfilController {
 
-    // Requisitamos que o Spring injete o UsuarioService
-    @Inject
-    private UsuarioService usuarioService;
 
 	@RequestMapping(method = RequestMethod.POST, produces = "text/html")
-    public String create(Usuario usuario, BindingResult bindingResult, Model uiModel, HttpServletRequest httpServletRequest) {
+    public String create(@Valid Usuario usuario, BindingResult bindingResult, Model uiModel, HttpServletRequest httpServletRequest) {
         if (bindingResult.hasErrors()) {
             return createForm(uiModel);
         }
         uiModel.asMap().clear();
-        
-        //Apenas passamos o objeto Usuario para nosso método
-        usuarioService.cadastre(usuario);
-        // Redirecionamos para a página de login
-        return "redirect:/perfil?formlogin";
+        usuario.persist();
+        return "redirect:/perfil/" + encodeUrlPathSegment(usuario.getId().toString(), httpServletRequest);
     }
 
 	@RequestMapping(params = "form", produces = "text/html")
