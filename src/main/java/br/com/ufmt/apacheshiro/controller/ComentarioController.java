@@ -27,14 +27,14 @@ public class ComentarioController {
 
     @Inject
     private UsuarioService usuarioService;
-
+    
     @RequestMapping(method = RequestMethod.POST, produces = "text/html")
+    @RequiresPermissions(Permissoes.Dominio.COMENTARIO+":"+Permissoes.Operacao.CRIAR)
     public String create(@Valid Comentario comentario, BindingResult bindingResult, Model uiModel, HttpServletRequest httpServletRequest) {
         if (bindingResult.hasErrors()) {
             populateEditForm(uiModel, comentario);
             return "comentarios/create";
         }
-        //linha modificada neste método
         comentario.setAutor(usuarioService.getUsuarioCorrente());
         uiModel.asMap().clear();
         comentario.persist();
@@ -42,12 +42,14 @@ public class ComentarioController {
     }
 
     @RequestMapping(params = "form", produces = "text/html")
+    @RequiresPermissions(Permissoes.Dominio.COMENTARIO+":"+Permissoes.Operacao.CRIAR)
     public String createForm(Model uiModel) {
         populateEditForm(uiModel, new Comentario());
         return "comentarios/create";
     }
 
     @RequestMapping(value = "/{id}", produces = "text/html")
+    @RequiresPermissions(Permissoes.Dominio.COMENTARIO+":"+Permissoes.Operacao.LER)
     public String show(@PathVariable("id") Long id, Model uiModel) {
         uiModel.addAttribute("comentario", Comentario.findComentario(id));
         uiModel.addAttribute("itemId", id);
@@ -55,6 +57,7 @@ public class ComentarioController {
     }
 
     @RequestMapping(produces = "text/html")
+    @RequiresPermissions(Permissoes.Dominio.COMENTARIO+":"+Permissoes.Operacao.LER)
     public String list(@RequestParam(value = "page", required = false) Integer page, @RequestParam(value = "size", required = false) Integer size, Model uiModel) {
         if (page != null || size != null) {
             int sizeNo = size == null ? 10 : size.intValue();
@@ -69,6 +72,7 @@ public class ComentarioController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = "text/html")
+    @RequiresPermissions(Permissoes.Dominio.COMENTARIO+":"+Permissoes.Operacao.DELETAR)
     public String delete(@PathVariable("id") Long id, @RequestParam(value = "page", required = false) Integer page, @RequestParam(value = "size", required = false) Integer size, Model uiModel) {
         Comentario comentario = Comentario.findComentario(id);
         comentario.remove();
@@ -80,7 +84,6 @@ public class ComentarioController {
 
     void populateEditForm(Model uiModel, Comentario comentario) {
         uiModel.addAttribute("comentario", comentario);
-        uiModel.addAttribute("usuarios", Usuario.findAllUsuarios());
     }
 
     String encodeUrlPathSegment(String pathSegment, HttpServletRequest httpServletRequest) {
