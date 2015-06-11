@@ -26,6 +26,8 @@
     <mvc:interceptors>
         <bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
         <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang"/>
+        <!-- Referenciamos o interceptor pelo nome que declaramos no @Component -->
+        <ref bean="usuarioCorrenteInterceptor"/>
     </mvc:interceptors>
 
     <!-- Selects a static view for rendering without the need for an explicit controller -->

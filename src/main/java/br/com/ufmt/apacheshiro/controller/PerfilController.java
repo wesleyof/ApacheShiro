@@ -52,14 +52,42 @@ public class PerfilController {
     }
 	
 	@RequestMapping(value="/login", method = RequestMethod.POST, produces = "text/html")
-    public String login(Usuario usuario, BindingResult bindingResult, Model uiModel, HttpServletRequest httpServletRequest) {
+    public String login(Usuario usuario, BindingResult bindingResult, Model uiModel, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         if (bindingResult.hasErrors()) {
             return loginForm(uiModel);
         }
         uiModel.asMap().clear();
-        // TODO Login usuario
-//        return "redirect:/perfil/show";
-        return loginForm(uiModel);
+        
+        try{
+            // Criamos um token com o login e senha do usuário
+            UsernamePasswordToken token = new UsernamePasswordToken
+                (usuario.getLogin(), usuario.getSenha());
+            // Chamamos o método de login com esse token
+            SecurityUtils.getSubject().login(token);
+            // Caso passe da linha acima, a autenticação foi feita com sucesso
+            try {
+                /* Aqui está como é feito o redirecionamento para o destino 
+                    original. Repare que usamos o nome completo da classe 
+                    porque já existe uma classe com o nome WebUtils do Spring
+                    sendo usada nesse Controller. */
+                org.apache.shiro.web.util.WebUtils.redirectToSavedRequest
+                    (httpServletRequest, httpServletResponse, "/perfil");
+            } catch (IOException e) {
+                /*Caso aconteça algum erro para recuperar a requisição salva,
+                    redireciona para a página de perfil*/
+                return "redirect:/perfil";
+            }
+            /*É importante retornar null para informar o Spring MVC que já 
+            cuidamos da resposta da requisição.*/
+            return null; //tells Spring MVC you've handled the response, and not to render a view
+        }
+        catch(AuthenticationException e){
+            e.printStackTrace();
+            /* Caso aconteça algum problema na autenticação, como usuário
+                e senha incorretos, apenas redirecionamos para a página de
+                login */
+            return loginForm(uiModel);
+        }
     }
 	
 	@RequestMapping(params = "formlogin", produces = "text/html")
@@ -70,7 +98,9 @@ public class PerfilController {
 	
 	@RequestMapping("/logout")
     public String logout() {
-        // TODO Fazer logout
+        /*Simplesmente chama o método de logout e
+          redireciona para a página inicial.*/
+        SecurityUtils.getSubject().logout();
         return "redirect:/";
     }
 	
