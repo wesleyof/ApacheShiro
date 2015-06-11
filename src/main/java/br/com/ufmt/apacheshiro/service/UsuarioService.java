@@ -15,6 +15,7 @@ import br.com.ufmt.apacheshiro.model.bean.Usuario;
 @Service("usuarioService")
 public class UsuarioService {
 
+
 	public static final String USUARIO_CORRENTE = "usuarioCorrente";
 	
 	@Value("${criptografia.numeroDeIteracoesDeHash}")
@@ -37,6 +38,21 @@ public class UsuarioService {
         usuario.setSenha(hashedPasswordBase64);
         usuario.setSalt(salt.toBase64());
         usuario.persist();
+	}
+
+	public Usuario getUsuarioCorrente(){
+		Subject subject = SecurityUtils.getSubject();
+		if(!subject.isAuthenticated()){
+			return null;
+		}
+		Usuario usuario = (Usuario) subject.getSession()
+			.getAttribute(USUARIO_CORRENTE);
+		if(usuario == null){
+			Long usuarioId = (Long) subject.getPrincipal();
+			usuario = Usuario.findUsuario(usuarioId);
+			subject.getSession().setAttribute(USUARIO_CORRENTE, usuario);
+		}
+		return usuario;
 	}
 }
 
