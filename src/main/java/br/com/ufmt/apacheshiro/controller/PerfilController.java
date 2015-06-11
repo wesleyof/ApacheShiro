@@ -110,12 +110,10 @@ public class PerfilController {
 	}
 
 	@RequestMapping(produces = "text/html")
+    @RequiresAuthentication
     public String show(Model uiModel) {
-		// TODO Pegar usuário logado
-		throw new NotYetImplementedException("Ainda não foi implementado");
-//        uiModel.addAttribute("usuario", Usuario.findUsuario(id));
-//        uiModel.addAttribute("itemId", id);
-//        return "perfil/show";
+        // Indica qual JSPX o Spring MVC deverá mostrar
+        return "perfil/show";
     }
 
 	@RequestMapping(method = RequestMethod.PUT, produces = "text/html")
