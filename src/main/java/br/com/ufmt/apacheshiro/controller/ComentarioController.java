@@ -2,9 +2,11 @@ package br.com.ufmt.apacheshiro.controller;
 
 import java.io.UnsupportedEncodingException;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,11 +18,15 @@ import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 import br.com.ufmt.apacheshiro.model.bean.Comentario;
-import br.com.ufmt.apacheshiro.model.bean.Usuario;
+import br.com.ufmt.apacheshiro.service.UsuarioService;
+import br.com.ufmt.apacheshiro.security.Permissoes;
 
 @RequestMapping("/comentarios")
 @Controller
 public class ComentarioController {
+
+    @Inject
+    private UsuarioService usuarioService;
 
     @RequestMapping(method = RequestMethod.POST, produces = "text/html")
     public String create(@Valid Comentario comentario, BindingResult bindingResult, Model uiModel, HttpServletRequest httpServletRequest) {
@@ -28,6 +34,8 @@ public class ComentarioController {
             populateEditForm(uiModel, comentario);
             return "comentarios/create";
         }
+        //linha modificada neste método
+        comentario.setAutor(usuarioService.getUsuarioCorrente());
         uiModel.asMap().clear();
         comentario.persist();
         return "redirect:/comentarios/" + encodeUrlPathSegment(comentario.getId().toString(), httpServletRequest);
