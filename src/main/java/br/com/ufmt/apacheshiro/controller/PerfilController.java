@@ -47,7 +47,11 @@ public class PerfilController {
 
 	@RequestMapping(params = "form", produces = "text/html")
     public String createForm(Model uiModel) {
-        populateEditForm(uiModel, new Usuario());
+        Usuario usuarioCorrente = usuarioService.getUsuarioCorrente();
+        if(usuarioCorrente == null){
+            usuarioCorrente = new Usuario();
+        }
+        populateEditForm(uiModel, usuarioCorrente);
         return "perfil/create";
     }
 	
