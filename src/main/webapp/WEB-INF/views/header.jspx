@@ -1,13 +1,33 @@
-<div id="header" xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" version="2.0">
-  <jsp:directive.page contentType="text/html;charset=UTF-8" />
-  <jsp:output omit-xml-declaration="yes" />
+<div id="header" xmlns:shiro="http://shiro.apache.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page"
+     xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+     xmlns:spring="http://www.springframework.org/tags" version="2.0">
+    <jsp:directive.page contentType="text/html;charset=UTF-8"/>
+    <jsp:output omit-xml-declaration="yes"/>
 
-  <spring:url var="banner" value="/resources/images/banner-graphic.png" />
-  <spring:url var="home" value="/" />
-  <spring:message code="button_home" var="home_label" htmlEscape="false" />
-  <a href="${home}" name="${fn:escapeXml(home_label)}" title="${fn:escapeXml(home_label)}">
-    <img src="${banner}" />
-  </a>
-  <div id="usuarioLogado"><p>Olá, Usuário. <a href="${home}perfil/logout">Logout</a>. <a href="${home}perfil">Mostrar perfil</a></p></div>
-  <div id="usuarioDeslogado"><p>Olá, Anônimo. <a href="${home}perfil?formlogin">Login</a>. <a href="${home}perfil?form">Cadastrar</a></p></div>
+    <spring:url var="banner" value="/resources/images/banner-graphic.png"/>
+    <spring:url var="home" value="/"/>
+    <spring:message code="button_home" var="home_label" htmlEscape="false"/>
+    <a href="${home}" name="${fn:escapeXml(home_label)}" title="${fn:escapeXml(home_label)}">
+        <img src="${banner}"/>
+    </a>
+    <!-- O novo código que substituirá o antigo começa aqui -->
+    <!-- Aqui testamos se o sujeito corrente está autenticado ou lembrado.
+         O código interno a essa tag só será mostrado em um desses casos.
+         Portanto, ela tem o comportamento de IF -->
+    <shiro:user>
+    <!-- Aqui mostramos um cumprimento ao usuário, um link de logout e um link
+         para seu perfil. Lembrando que usamos o usuário corrente disponibilizado
+         pelo interceptador configurado anteriormente. -->
+        <div id="usuarioLogado"><p>Olá, ${usuarioCorrente.nome}. <a href="${home}perfil/logout">Logout</a>. <a
+                href="${home}perfil">Mostrar perfil</a></p></div>
+    </shiro:user>
+    <!-- Assim como a tag acima, essa se comporta como IF e só mostra o conteúdo
+         interno para usuários anônimos. -->
+    <shiro:guest>
+    <!-- Aqui apenas mostramos uma mensagem de cumprimento fixo e
+         disponibilizamos os links de login e cadastro. -->
+        <div id="usuarioDeslogado"><p>Olá, Anônimo. <a href="${home}perfil?formlogin">Login</a>. <a
+                href="${home}perfil?form">Cadastrar</a></p></div>
+    </shiro:guest>
+
 </div> 
